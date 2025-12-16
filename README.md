@@ -16,4 +16,4 @@ git push
 git checkout master
 ```
 
-Source: https://nsalexamy.github.io/service-foundry/pages/documents/blog/github-helm-repo/
+[Source](https://nsalexamy.github.io/service-foundry/pages/documents/blog/github-helm-repo/)
