@@ -1,0 +1,150 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cloudreve.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cloudreve.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "cloudreve.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "cloudreve.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cloudreve.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.cloudreve.system.listen }}
+              protocol: TCP
+            - name: aria2-tcp
+              containerPort: 6888
+              protocol: TCP
+            - name: aria2-udp
+              containerPort: 6888
+              protocol: UDP
+          env:
+            - name: CR_CONF_System.Mode
+              value: {{ .Values.cloudreve.system.mode | quote }}
+            - name: CR_CONF_System.Listen
+              value: {{ printf ":%d" (.Values.cloudreve.system.listen | int) | quote }}
+            - name: CR_CONF_System.Debug
+              value: {{ .Values.cloudreve.system.debug | quote }}
+            - name: CR_CONF_System.ProxyHeader
+              value: {{ .Values.cloudreve.system.proxyHeader | quote }}
+            - name: CR_CONF_System.GracePeriod
+              value: {{ .Values.cloudreve.system.gracePeriod | quote }}
+            - name: CR_CONF_System.LogLevel
+              value: {{ .Values.cloudreve.system.logLevel | quote }}
+            - name: CR_CONF_Database.Type
+              value: {{ .Values.cloudreve.database.type | quote }}
+            - name: CR_CONF_Database.Port
+              value: {{ .Values.cloudreve.database.port | quote }}
+            - name: CR_CONF_Database.User
+              value: {{ .Values.cloudreve.database.user | quote }}
+            - name: CR_CONF_Database.Password
+              value: {{ .Values.cloudreve.database.password | quote }}
+            - name: CR_CONF_Database.Host
+              value: {{ .Values.cloudreve.database.host | quote }}
+            - name: CR_CONF_Database.Name
+              value: {{ .Values.cloudreve.database.name | quote }}
+            - name: CR_CONF_Database.Charset
+              value: {{ .Values.cloudreve.database.charset | quote }}
+            - name: CR_CONF_Database.DBFile
+              value: {{ .Values.cloudreve.database.unixSocket | quote }}
+            - name: CR_CONF_Database.DatabaseURL
+              value: {{ .Values.cloudreve.database.databaseURL | quote }}
+            - name: CR_CONF_CORS.AllowOrigins
+              value: {{ .Values.cloudreve.cors.allowOrigins | quote }}
+            - name: CR_CONF_CORS.AllowMethods
+              value: {{ .Values.cloudreve.cors.allowMethods | quote }}
+            - name: CR_CONF_CORS.AllowHeaders
+              value: {{ .Values.cloudreve.cors.allowHeaders | quote }}
+            - name: CR_CONF_CORS.AllowCredentials
+              value: {{ .Values.cloudreve.cors.allowCredentials | quote }}
+            - name: CR_CONF_Redis.Network
+              value: {{ .Values.cloudreve.redis.network | quote }}
+            - name: CR_CONF_Redis.Server
+              value: {{ .Values.cloudreve.redis.server | quote }}
+            - name: CR_CONF_Redis.Password
+              value: {{ .Values.cloudreve.redis.password | quote }}
+            - name: CR_CONF_Redis.DB
+              value: {{ .Values.cloudreve.redis.db | quote }}
+            - name: CR_CONF_Redis.User
+              value: {{ .Values.cloudreve.redis.user | quote }}
+            - name: CR_CONF_Redis.UseTLS
+              value: {{ .Values.cloudreve.redis.useTLS | quote }}
+            - name: CR_CONF_Redis.TLSSkipVerify
+              value: {{ .Values.cloudreve.redis.tlsSkipVerify | quote }}
+            {{- range $key, $value := .Values.cloudreve.optionOverwrite }}
+            - name: CR_CONF_OptionOverwrite.{{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /cloudreve/data
+              name: cloudreve-data
+            {{- if .Values.persistence.additionalMounts }}
+              {{- .Values.persistence.additionalMounts | toYaml | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: cloudreve-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "cloudreve.fullname" .) }}
+          {{- else }}
+          emptyDir: { }
+          {{- end }}
+        {{- if .Values.persistence.additionalVolumes }}
+          {{- .Values.persistence.additionalVolumes | toYaml | nindent 8}}
+        {{- end }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
