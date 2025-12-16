@@ -69,7 +69,14 @@ spec:
             - name: CR_CONF_Database.User
               value: {{ .Values.cloudreve.database.user | quote }}
             - name: CR_CONF_Database.Password
+              {{- if and .Values.cloudreve.database.existingSecret .Values.cloudreve.database.existingSecretName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.cloudreve.database.existingSecret }}
+                  key: {{ .Values.cloudreve.database.existingSecretName }}
+              {{- else }}
               value: {{ .Values.cloudreve.database.password | quote }}
+              {{- end }}
             - name: CR_CONF_Database.Host
               value: {{ .Values.cloudreve.database.host | quote }}
             - name: CR_CONF_Database.Name

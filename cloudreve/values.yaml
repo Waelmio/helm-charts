@@ -33,6 +33,9 @@ cloudreve:
     user: ""
     # Password, default is empty
     password: ""
+    # If not empty, use existing secret instead as a password, default is empty
+    existingSecret: ""
+    existingSecretName: "password"
     # Database address, default is empty
     host: 127.0.0.1
     # Database name, default is empty
