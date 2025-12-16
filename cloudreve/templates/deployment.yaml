@@ -77,7 +77,7 @@ spec:
             - name: CR_CONF_Database.Charset
               value: {{ .Values.cloudreve.database.charset | quote }}
             - name: CR_CONF_Database.DBFile
-              value: {{ .Values.cloudreve.database.unixSocket | quote }}
+              value: {{ .Values.cloudreve.database.dbFile | quote }}
             - name: CR_CONF_Database.DatabaseURL
               value: {{ .Values.cloudreve.database.databaseURL | quote }}
             - name: CR_CONF_CORS.AllowOrigins
