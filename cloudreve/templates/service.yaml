@@ -13,12 +13,12 @@ spec:
       protocol: TCP
       name: http
     - name: aria2-tcp
+      port: 6888
       targetPort: aria2-tcp
-      containerPort: 6888
       protocol: TCP
     - name: aria2-udp
+      port: 6888
       targetPort: aria2-udp
-      containerPort: 6888
       protocol: UDP
   selector:
     {{- include "cloudreve.selectorLabels" . | nindent 4 }}
