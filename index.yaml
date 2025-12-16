@@ -3,12 +3,12 @@ entries:
   cloudreve:
   - apiVersion: v2
     appVersion: 4.10.1
-    created: "2025-12-16T19:50:40.80805068+01:00"
+    created: "2025-12-16T20:01:21.830929489+01:00"
     description: A CloudReve Helm chart for Kubernetes
-    digest: fd236a022bc746731916582071ab1afcae2b834790f235f2b00dfa5ca02ce196
+    digest: 2b07ba1317711b6fd79eec129a569de2aec96b7d134de37556d1d745081bc943
     name: cloudreve
     type: application
     urls:
     - https://waelmio.github.io/helm-charts/cloudreve-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-16T19:50:40.807698197+01:00"
+generated: "2025-12-16T20:01:21.830545649+01:00"
