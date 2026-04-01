@@ -1,0 +1,18 @@
+{{- if and (eq .Values.database.type "sqlite") .Values.database.sqlite.persistence.enabled (not .Values.database.sqlite.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "cal-kg-tracker.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cal-kg-tracker.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.database.sqlite.persistence.storageClass }}
+  storageClassName: {{ .Values.database.sqlite.persistence.storageClass }}
+  {{- end }}
+  accessModes:
+    - {{ .Values.database.sqlite.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.database.sqlite.persistence.size | quote }}
+{{- end }}

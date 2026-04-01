@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cal-kg-tracker.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cal-kg-tracker.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "cal-kg-tracker.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "cal-kg-tracker.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cal-kg-tracker.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            {{- if eq .Values.database.type "postgres" }}
+            {{- if .Values.database.postgres.connectionUrl }}
+            - name: DATABASE_URL
+              value: {{ .Values.database.postgres.connectionUrl | quote }}
+            {{- else }}
+            - name: POSTGRES_HOST
+              value: {{ .Values.database.postgres.host | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.database.postgres.db | quote }}
+            - name: POSTGRES_USER
+              {{- if .Values.database.postgres.existingUserSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.postgres.existingUserSecret }}
+                  key: {{ .Values.database.postgres.existingUserSecretKey }}
+              {{- else }}
+              value: {{ .Values.database.postgres.user | quote }}
+              {{- end }}
+            - name: POSTGRES_PASSWORD
+              {{- if .Values.database.postgres.existingPasswordSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.postgres.existingPasswordSecret }}
+                  key: {{ .Values.database.postgres.existingPasswordSecretKey }}
+              {{- else }}
+              value: {{ .Values.database.postgres.password | quote }}
+              {{- end }}
+            {{- end }}
+            {{- else }}
+            - name: SQL_DB_PATH
+              value: {{ .Values.database.sqlite.dbPath | quote }}
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if eq .Values.database.type "sqlite" }}
+          volumeMounts:
+            - mountPath: /data
+              name: data
+          {{- end }}
+      {{- if eq .Values.database.type "sqlite" }}
+      volumes:
+        - name: data
+          {{- if .Values.database.sqlite.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.database.sqlite.persistence.existingClaim | default (include "cal-kg-tracker.fullname" .) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
