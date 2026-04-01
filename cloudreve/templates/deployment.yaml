@@ -77,6 +77,17 @@ spec:
               {{- else }}
               value: {{ .Values.cloudreve.database.password | quote }}
               {{- end }}
+            {{- if .Values.cloudreve.database.sslMode }}
+            - name: CLOUDREVE_DB_PASSWORD
+              {{- if and .Values.cloudreve.database.existingSecret .Values.cloudreve.database.existingSecretName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.cloudreve.database.existingSecret }}
+                  key: {{ .Values.cloudreve.database.existingSecretName }}
+              {{- else }}
+              value: {{ .Values.cloudreve.database.password | quote }}
+              {{- end }}
+            {{- end }}
             - name: CR_CONF_Database.Host
               value: {{ .Values.cloudreve.database.host | quote }}
             - name: CR_CONF_Database.Name
@@ -86,7 +97,11 @@ spec:
             - name: CR_CONF_Database.DBFile
               value: {{ .Values.cloudreve.database.dbFile | quote }}
             - name: CR_CONF_Database.DatabaseURL
+              {{- if .Values.cloudreve.database.sslMode }}
+              value: {{ printf "postgres://%s:$(CLOUDREVE_DB_PASSWORD)@%s:%d/%s?sslmode=%s" .Values.cloudreve.database.user .Values.cloudreve.database.host (.Values.cloudreve.database.port | int) .Values.cloudreve.database.name .Values.cloudreve.database.sslMode | quote }}
+              {{- else }}
               value: {{ .Values.cloudreve.database.databaseURL | quote }}
+              {{- end }}
             - name: CR_CONF_CORS.AllowOrigins
               value: {{ .Values.cloudreve.cors.allowOrigins | quote }}
             - name: CR_CONF_CORS.AllowMethods

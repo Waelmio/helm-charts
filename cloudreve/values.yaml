@@ -44,6 +44,10 @@ cloudreve:
     charset: utf8mb4
     # SQLite database file path, default is data/cloudreve.db
     dbFile: cloudreve.db
+    # SSL mode for PostgreSQL connections. Available values: disable/allow/prefer/require, default is empty (disabled).
+    # When set, a DatabaseURL will be constructed automatically using the other database fields.
+    # This takes precedence over databaseURL below.
+    sslMode: ""
     # Database connection string, if set, other database configuration will be ignored,
     # but type is still required.
     databaseURL: ""
