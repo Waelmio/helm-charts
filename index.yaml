@@ -3,7 +3,7 @@ entries:
   cal-kg-tracker:
   - apiVersion: v2
     appVersion: 1.2.0
-    created: "2026-04-01T21:52:00.630061252+02:00"
+    created: "2026-04-02T00:10:03.819369857+02:00"
     description: A Helm chart for my Weight Loss Tracker application.
     digest: 6881a7a2f823f2c2c36aaae96d6b89bae0f6542e69c5c8a19718e615a102498c
     name: cal-kg-tracker
@@ -15,8 +15,18 @@ entries:
     version: 1.2.0
   cloudreve:
   - apiVersion: v2
+    appVersion: 4.15.0
+    created: "2026-04-02T00:10:03.82078677+02:00"
+    description: A CloudReve Helm chart for Kubernetes
+    digest: a10cf6980eb47ed528c42f5cccf23aa2d99d74d2d05f32f2da6438af5ee8d216
+    name: cloudreve
+    type: application
+    urls:
+    - https://waelmio.github.io/helm-charts/cloudreve-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     appVersion: 4.10.1
-    created: "2025-12-16T20:28:43.278035825+01:00"
+    created: "2026-04-02T00:10:03.820422974+02:00"
     description: A CloudReve Helm chart for Kubernetes
     digest: 4c9011b887d5044f8d83451b67c6346cb673deff524de4cae5c62211438166fa
     name: cloudreve
@@ -26,7 +36,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: 4.10.1
-    created: "2025-12-16T20:28:43.277772319+01:00"
+    created: "2026-04-02T00:10:03.81992634+02:00"
     description: A CloudReve Helm chart for Kubernetes
     digest: 7f38143fab9767c85da1fc3f8a9b47d26178540c3b9f83b708be45c88f931f23
     name: cloudreve
@@ -34,4 +44,4 @@ entries:
     urls:
     - https://waelmio.github.io/helm-charts/cloudreve-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-16T20:28:43.277293524+01:00"
+generated: "2026-04-02T00:10:03.818855382+02:00"
