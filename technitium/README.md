@@ -2,6 +2,13 @@
 
 Helm chart for [Technitium DNS Server](https://technitium.com/dns/).
 
+# Install
+
+```sh
+helm repo add waelmio https://waelmio.github.io/helm-charts
+helm install my-technitium waelmio/technitium
+```
+
 # Values
 
 ## Credentials

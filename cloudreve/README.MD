@@ -3,6 +3,13 @@
 Not finding an official Helm Chart for CloudReve, I created one myself.
 This is NOT an official Helm Chart for CloudReve.
 
+# Install
+
+```sh
+helm repo add waelmio https://waelmio.github.io/helm-charts
+helm install my-cloudreve waelmio/cloudreve
+```
+
 # Values
 
 ## `cloudreve.system`
@@ -32,6 +39,7 @@ This chart does not deploy a database. Bring your own for anything other than SQ
 | `cloudreve.database.existingSecretName` | `password` | Key within the existing Secret that holds the password. |
 | `cloudreve.database.charset` | `utf8mb4` | Connection character set (MySQL/MariaDB). |
 | `cloudreve.database.dbFile` | `cloudreve.db` | SQLite database file path (relative to the data directory). Only used when `type` is `sqlite`. |
+| `cloudreve.database.sslMode` | `""` | PostgreSQL SSL mode (`disable`, `allow`, `prefer`, `require`). When set, overrides `databaseURL` and constructs the DSN automatically. |
 | `cloudreve.database.databaseURL` | `""` | Full database connection string (DSN). When set, all individual fields above are ignored (except `type`). |
 
 ## `cloudreve.cors`

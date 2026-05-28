@@ -2,6 +2,13 @@
 
 Helm chart for the [cal-kg-tracker](https://github.com/Waelmio/cal-kg-tracker) weight loss tracker application.
 
+# Install
+
+```sh
+helm repo add waelmio https://waelmio.github.io/helm-charts
+helm install my-cal-kg-tracker waelmio/cal-kg-tracker
+```
+
 # Values
 
 ## `database`
