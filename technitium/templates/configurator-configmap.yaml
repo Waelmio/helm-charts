@@ -1,0 +1,12 @@
+{{- if .Values.configurator.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "technitium.fullname" . }}-configurator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "technitium.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    {{- .Values.configurator.config | toYaml | nindent 4 }}
+{{- end }}

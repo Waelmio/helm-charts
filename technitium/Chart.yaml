@@ -1,0 +1,9 @@
+apiVersion: v2
+name: technitium
+description: A Helm chart for Technitium DNS Server
+
+type: application
+
+version: 0.1.0
+
+appVersion: "15.2.0"

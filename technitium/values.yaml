@@ -1,0 +1,119 @@
+image:
+  repository: technitium/dns-server
+  pullPolicy: IfNotPresent
+  tag: ""
+
+replicaCount: 1
+
+# Admin credentials — use existingSecret to pull from a Kubernetes secret
+adminUsername:
+  existingSecret: ""
+  existingSecretKey: "username"
+  # plain text fallback if no secret is used (Technitium default is "admin")
+  value: "admin"
+
+adminPassword:
+  existingSecret: ""
+  existingSecretKey: "password"
+  # plain text fallback if no secret is used
+  value: ""
+
+timezone: "UTC"
+
+# LoadBalancer service for DNS traffic (port 53 TCP+UDP)
+dnsService:
+  type: LoadBalancer
+  loadBalancerIP: ""
+  annotations: {}
+
+# ClusterIP service for the admin UI (port 5380)
+adminService:
+  type: ClusterIP
+  port: 5380
+
+persistence:
+  enabled: true
+  storageClass: ""
+  existingClaim: ""
+  accessMode: ReadWriteOnce
+  size: 2Gi
+
+resources: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: technitium.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+configurator:
+  # Enable the post-install/post-upgrade Job that applies config via technitium-configurator.
+  # When enabled, a ConfigMap is created from config below and applied after every helm deploy.
+  enabled: false
+
+  image:
+    repository: ashtonian/technitium-configurator
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  # Raw technitium-configurator YAML config.
+  # See https://github.com/ashtonian/technitium-configurator for full schema.
+  # Example:
+  # config:
+  #   dnsSettings:
+  #     recursion: AllowOnlyForPrivateNetworks
+  #     forwarders:
+  #       - 1.1.1.1
+  #       - 1.0.0.1
+  #   zones:
+  #     - zone: "example.com"
+  #       type: Primary
+  #   records:
+  #     - domain: "*.example.com"
+  #       type: A
+  #       ipAddress: "192.168.1.1"
+  #   apps:
+  #     - name: "Advanced Blocking"
+  #       config:
+  #         enableBlocking: true
+  #         blockListUrls:
+  #           - https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
+  #         allowListUrls:
+  #           - https://example.com/my-allowlist.txt
+  config: {}
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 15

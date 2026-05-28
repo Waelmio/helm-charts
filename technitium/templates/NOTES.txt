@@ -1,0 +1,8 @@
+Technitium DNS Server has been deployed.
+
+Admin UI port: 5380
+  kubectl port-forward svc/{{ include "technitium.fullname" . }} 5380:5380
+
+DNS service: {{ include "technitium.fullname" . }}-dns (port 53 TCP+UDP)
+
+Post-install: open the admin UI and configure your DNS zones and upstream forwarders.
