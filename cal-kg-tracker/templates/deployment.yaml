@@ -7,6 +7,10 @@ metadata:
     {{- include "cal-kg-tracker.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "cal-kg-tracker.selectorLabels" . | nindent 6 }}
@@ -76,6 +80,31 @@ spec:
             - name: SQL_DB_PATH
               value: {{ .Values.database.sqlite.dbPath | quote }}
             {{- end }}
+            {{- with .Values.integrations.fatsecret }}
+            {{- if .existingSecret }}
+            - name: FATSECRET_CONSUMER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .existingSecret }}
+                  key: {{ .existingSecretConsumerKeyKey }}
+            - name: FATSECRET_CONSUMER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .existingSecret }}
+                  key: {{ .existingSecretConsumerSecretKey }}
+            {{- else if and .consumerKey .consumerSecret }}
+            - name: FATSECRET_CONSUMER_KEY
+              value: {{ .consumerKey | quote }}
+            - name: FATSECRET_CONSUMER_SECRET
+              value: {{ .consumerSecret | quote }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.publicBaseUrl }}
+            - name: PUBLIC_BASE_URL
+              value: {{ . | quote }}
+            {{- end }}
+            - name: DATA_PROTECTION_KEYS_PATH
+              value: /data/keys
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -88,21 +117,17 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if eq .Values.database.type "sqlite" }}
           volumeMounts:
             - mountPath: /data
               name: data
-          {{- end }}
-      {{- if eq .Values.database.type "sqlite" }}
       volumes:
         - name: data
-          {{- if .Values.database.sqlite.persistence.enabled }}
+          {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: {{ .Values.database.sqlite.persistence.existingClaim | default (include "cal-kg-tracker.fullname" .) }}
+            claimName: {{ .Values.persistence.existingClaim | default (include "cal-kg-tracker.fullname" .) }}
           {{- else }}
           emptyDir: {}
           {{- end }}
-      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

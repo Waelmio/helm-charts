@@ -1,5 +1,12 @@
 replicaCount: 1
 
+# Stops the old pod before starting the new one: the volume is ReadWriteOnce by default.
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 0
+    maxUnavailable: 1
+
 image:
   repository: ghcr.io/waelmio/cal-kg-tracker
   pullPolicy: IfNotPresent
@@ -23,18 +30,22 @@ podSecurityContext: {}
 
 securityContext: {}
 
+# Volume for all the data of the app, mounted at /data: the SQLite database and the keys that encrypt integration tokens.
+# When disabled, the data is lost with the pod. Required by the integrations, unless they allow otherwise.
+persistence:
+  enabled: true
+  storageClass: ""
+  existingClaim: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
 database:
   # Database type: sqlite or postgres
   type: sqlite
 
   sqlite:
+    # Must be under /data to be persisted.
     dbPath: /data/weighttracker.db
-    persistence:
-      enabled: true
-      storageClass: ""
-      existingClaim: ""
-      accessMode: ReadWriteOnce
-      size: 1Gi
 
   postgres:
     # Set connectionUrl for a full DSN, or fill in the individual fields below.
@@ -50,6 +61,23 @@ database:
     # Override password from an existing secret instead of the plaintext value above.
     existingPasswordSecret: ""
     existingPasswordSecretKey: password
+
+# Public address of the app (e.g. https://weight.example.com), where FatSecret sends the browser back after login.
+# Empty uses the address the browser is using.
+publicBaseUrl: ""
+
+integrations:
+  fatsecret:
+    # OAuth 1.0 Consumer Key and Consumer Secret of your FatSecret developer account (not the OAuth 2.0 ones).
+    # Both are needed to enable the integration. Requires persistence.enabled, unless allowWithoutPersistence is set.
+    consumerKey: ""
+    consumerSecret: ""
+    # Read both from an existing secret instead of the plaintext values above.
+    existingSecret: ""
+    existingSecretConsumerKeyKey: consumer-key
+    existingSecretConsumerSecretKey: consumer-secret
+    # Deploy even when persistence is disabled. FatSecret must then be connected again each time the pod is replaced.
+    allowWithoutPersistence: false
 
 service:
   type: ClusterIP

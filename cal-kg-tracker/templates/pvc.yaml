@@ -1,4 +1,12 @@
-{{- if and (eq .Values.database.type "sqlite") .Values.database.sqlite.persistence.enabled (not .Values.database.sqlite.persistence.existingClaim) }}
+{{- if hasKey .Values.database.sqlite "persistence" }}
+{{- fail "database.sqlite.persistence has moved to persistence. Move your values there to keep using the same volume." }}
+{{- end }}
+{{- with .Values.integrations.fatsecret }}
+{{- if and (or .existingSecret (and .consumerKey .consumerSecret)) (not $.Values.persistence.enabled) (not .allowWithoutPersistence) }}
+{{- fail "integrations.fatsecret requires persistence.enabled=true: the keys that encrypt its token must be kept on a volume. Set integrations.fatsecret.allowWithoutPersistence=true to deploy anyway." }}
+{{- end }}
+{{- end }}
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -7,12 +15,12 @@ metadata:
   labels:
     {{- include "cal-kg-tracker.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.database.sqlite.persistence.storageClass }}
-  storageClassName: {{ .Values.database.sqlite.persistence.storageClass }}
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass }}
   {{- end }}
   accessModes:
-    - {{ .Values.database.sqlite.persistence.accessMode | quote }}
+    - {{ .Values.persistence.accessMode | quote }}
   resources:
     requests:
-      storage: {{ .Values.database.sqlite.persistence.size | quote }}
+      storage: {{ .Values.persistence.size | quote }}
 {{- end }}
